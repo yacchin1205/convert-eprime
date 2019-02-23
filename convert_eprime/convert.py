@@ -94,7 +94,7 @@ def etext_to_rcsv(in_file, param_file, out_file=None):
     print('Output file successfully created- {0}'.format(out_file))
 
 
-def text_to_csv(text_file, out_file):
+def text_to_csv(text_file, out_file, encoding=None):
     """
     Converts text file produced by successful completion of E-Prime experiment
     to csv. Output from text_to_csv can be used to determine information
@@ -118,13 +118,14 @@ def text_to_csv(text_file, out_file):
     'Output file successfully created- subj0001_0.csv'
 
     """
-    df = _text_to_df(text_file)
+    df = _text_to_df(text_file, encoding=encoding)
 
     df.to_csv(out_file, index=False)
     print('Output file successfully created- {0}'.format(out_file))
 
 
-def text_to_rcsv(text_file, edat_file, param_file, out_file):
+def text_to_rcsv(text_file, edat_file, param_file, out_file,
+                 encoding=None):
     """
     Converts text file produced by successful completion of E-Prime experiment
     to reduced csv. Considerably more complex than text_to_csv.
@@ -159,7 +160,7 @@ def text_to_rcsv(text_file, edat_file, param_file, out_file):
     with open(param_file, 'r') as file_object:
         param_dict = json.load(file_object)
 
-    df = _text_to_df(text_file)
+    df = _text_to_df(text_file, encoding=encoding)
 
     # Rename columns
     _, edat_suffix = os.path.splitext(edat_file)
@@ -186,16 +187,20 @@ def text_to_rcsv(text_file, edat_file, param_file, out_file):
     print('Output file successfully created- {0}'.format(out_file))
 
 
-def _text_to_df(text_file):
+def _text_to_df(text_file, encoding=None):
     """
     Convert a raw E-Prime output text file into a pandas DataFrame.
     """
     # Load the text file as a list.
-    with open(text_file, 'rb') as fo:
-        text_data = list(fo)
+    if encoding is None:
+        with open(text_file, 'rb') as fo:
+             text_data = list(fo)
 
-    # Remove unicode characters.
-    filtered_data = [remove_unicode(row.decode('utf-8', 'ignore')) for row in text_data]
+        # Remove unicode characters.
+        filtered_data = [remove_unicode(row.decode('utf-8', 'ignore')) for row in text_data]
+    else:
+        with open(text_file, 'r', encoding=encoding) as fo:
+            filtered_data = list(fo)
 
     # Determine where rows begin and end.
     start_index = [i for i, row in enumerate(filtered_data) if row == '*** LogFrame Start ***']
