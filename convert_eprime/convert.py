@@ -200,7 +200,8 @@ def _text_to_df(text_file, encoding=None):
         filtered_data = [remove_unicode(row.decode('utf-8', 'ignore')) for row in text_data]
     else:
         with open(text_file, 'r', encoding=encoding) as fo:
-            filtered_data = list(fo)
+            text_data = list(fo)
+        filtered_data = [row.strip() for row in text_data]
 
     # Determine where rows begin and end.
     start_index = [i for i, row in enumerate(filtered_data) if row == '*** LogFrame Start ***']
